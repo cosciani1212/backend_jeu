@@ -94,6 +94,7 @@ class CategorieController extends Controller
         $user = $request->user();
 
         $categorie = Categorie::create([
+            'user_id' => $user->id,
             'nom' => $request->nom,
             'description' => $request->description,
             'active' => $request->active ?? true,
