@@ -12,6 +12,10 @@ return new class extends Migration
         Schema::create('jeus', function (Blueprint $table) {
             $table->id();
 
+            $table->foreignId('user_id')
+                  ->constrained('users')
+                  ->cascadeOnDelete();
+
             $table->foreignId('categorie_id')
                   ->constrained('categories')
                   ->cascadeOnDelete();
@@ -19,6 +23,15 @@ return new class extends Migration
             $table->string('nom');
             $table->text('description')->nullable();
             $table->string('image')->nullable();
+            $table->integer('nombre_joueurs')->nullable();
+            $table->integer('nombre_equipes')->nullable();
+            $table->boolean('est_payant')->default(false);
+            $table->decimal('montant_inscription', 10, 2)->nullable();
+            $table->string('mode_competition')->nullable();
+            $table->date('date_demarrage')->nullable();
+            $table->date('date_limite_inscription')->nullable();
+            $table->string('statut')->default('en_attente');
+
             $table->boolean('active')->default(true);
             $table->boolean('deleted')->default(false);
 

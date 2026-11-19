@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\CategorieController;
 use App\Http\Controllers\Api\EquipeController;
 use App\Http\Controllers\Api\EvenementController;
 use App\Http\Controllers\Api\JuryController;
+use App\Http\Controllers\Api\JeuController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -41,6 +42,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // CATEGORIES
     Route::get('categories/search', [CategorieController::class, 'search']);
     Route::apiResource('categories', CategorieController::class);
+
+        // JEUS
+    Route::get('jeus/search', [JeuController::class, 'search']);
+    Route::apiResource('jeus', JeuController::class);
+
 
     // EQUIPES
     Route::get('equipes/search', [EquipeController::class, 'search']);

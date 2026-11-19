@@ -17,7 +17,7 @@ class EvenementController extends Controller
     {
         $user = $request->user();
 
-        $query = Evenement::with(['structure', 'jeu'])
+        $query = Evenement::with(['structure', 'jeus'])
             ->where('inserted_by', $user->id)
             ->where('deleted', false);
 
@@ -33,7 +33,7 @@ class EvenementController extends Controller
             ->paginate($request->get('per_page', 10));
 
         return response()->json([
-            'message' => 'Events retrieved successfully',
+            'message' => 'Événements récupérés avec succès',
             'data' => EvenementResource::collection($evenements),
             'meta' => [
                 'current_page' => $evenements->currentPage(),
@@ -49,20 +49,20 @@ class EvenementController extends Controller
      */
     public function show(Request $request, $id)
     {
-        $evenement = Evenement::with(['structure', 'jeu'])
+        $evenement = Evenement::with(['structure', 'jeus'])
             ->where('inserted_by', $request->user()->id)
             ->where('deleted', false)
             ->find($id);
 
         if (!$evenement) {
             return response()->json([
-                'message' => 'Event not found',
+                'message' => 'Événement introuvable',
                 'status' => 404,
             ], 404);
         }
 
         return response()->json([
-            'message' => 'Event retrieved successfully',
+            'message' => 'Événement récupéré avec succès',
             'data' => new EvenementResource($evenement),
             'status' => 200,
         ], 200);
@@ -77,7 +77,6 @@ class EvenementController extends Controller
 
         $validator = Validator::make($request->all(), [
             'structure_id' => 'required|exists:structures,id',
-            'jeu_id' => 'required|exists:jeux,id',
             'titre' => 'required|string|max:255',
             'description' => 'nullable|string',
             'lieu' => 'required|string|max:255',
@@ -88,12 +87,14 @@ class EvenementController extends Controller
         ], [
             'structure_id.required' => 'La structure est obligatoire.',
             'structure_id.exists' => 'La structure sélectionnée est invalide.',
-            'jeu_id.required' => 'Le jeu est obligatoire.',
-            'jeu_id.exists' => 'Le jeu sélectionné est invalide.',
             'titre.required' => 'Le titre est obligatoire.',
             'lieu.required' => 'Le lieu est obligatoire.',
             'date_debut.required' => 'La date de début est obligatoire.',
+            'date_debut.date' => 'La date de début doit être une date valide.',
+            'date_fin.date' => 'La date de fin doit être une date valide.',
             'date_fin.after_or_equal' => 'La date de fin doit être postérieure ou égale à la date de début.',
+            'statut.in' => 'Le statut sélectionné est invalide.',
+            'active.boolean' => 'Le champ actif doit être un booléen.',
         ]);
 
         $validator->after(function ($validator) use ($request, $user) {
@@ -123,7 +124,6 @@ class EvenementController extends Controller
         $evenement = Evenement::create([
             'user_id' => $user->id,
             'structure_id' => $request->structure_id,
-            'jeu_id' => $request->jeu_id,
             'titre' => $request->titre,
             'description' => $request->description,
             'lieu' => $request->lieu,
@@ -136,9 +136,9 @@ class EvenementController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'Event created successfully',
+            'message' => 'Événement créé avec succès',
             'data' => new EvenementResource(
-                $evenement->load(['structure', 'jeu'])
+                $evenement->load(['structure', 'jeus'])
             ),
             'status' => 201,
         ], 201);
@@ -157,14 +157,13 @@ class EvenementController extends Controller
 
         if (!$evenement) {
             return response()->json([
-                'message' => 'Event not found',
+                'message' => 'Événement introuvable',
                 'status' => 404,
             ], 404);
         }
 
         $validator = Validator::make($request->all(), [
             'structure_id' => 'required|exists:structures,id',
-            'jeu_id' => 'required|exists:jeux,id',
             'titre' => 'required|string|max:255',
             'description' => 'nullable|string',
             'lieu' => 'required|string|max:255',
@@ -174,12 +173,15 @@ class EvenementController extends Controller
             'active' => 'nullable|boolean',
         ], [
             'structure_id.required' => 'La structure est obligatoire.',
-            'structure_id.exists' => 'La structure est invalide.',
-            'jeu_id.required' => 'Le jeu est obligatoire.',
-            'jeu_id.exists' => 'Le jeu est invalide.',
+            'structure_id.exists' => 'La structure sélectionnée est invalide.',
             'titre.required' => 'Le titre est obligatoire.',
+            'lieu.required' => 'Le lieu est obligatoire.',
             'date_debut.required' => 'La date de début est obligatoire.',
-            'date_fin.after_or_equal' => 'La date de fin est invalide.',
+            'date_debut.date' => 'La date de début doit être une date valide.',
+            'date_fin.date' => 'La date de fin doit être une date valide.',
+            'date_fin.after_or_equal' => 'La date de fin doit être postérieure ou égale à la date de début.',
+            'statut.in' => 'Le statut sélectionné est invalide.',
+            'active.boolean' => 'Le champ actif doit être un booléen.',
         ]);
 
         $validator->after(function ($validator) use ($request, $user) {
@@ -208,7 +210,6 @@ class EvenementController extends Controller
 
         $evenement->update([
             'structure_id' => $request->structure_id,
-            'jeu_id' => $request->jeu_id,
             'titre' => $request->titre,
             'description' => $request->description,
             'lieu' => $request->lieu,
@@ -220,9 +221,9 @@ class EvenementController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'Event updated successfully',
+            'message' => 'Événement mis à jour avec succès',
             'data' => new EvenementResource(
-                $evenement->load(['structure', 'jeu'])
+                $evenement->load(['structure', 'jeus'])
             ),
             'status' => 200,
         ], 200);
@@ -241,7 +242,7 @@ class EvenementController extends Controller
 
         if (!$evenement) {
             return response()->json([
-                'message' => 'Event not found',
+                'message' => 'Événement introuvable',
                 'status' => 404,
             ], 404);
         }
@@ -253,7 +254,7 @@ class EvenementController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'Event deleted successfully',
+            'message' => 'Événement supprimé avec succès',
             'status' => 200,
         ], 200);
     }
@@ -265,7 +266,7 @@ class EvenementController extends Controller
     {
         $user = $request->user();
 
-        $query = Evenement::with(['structure', 'jeu'])
+        $query = Evenement::with(['structure', 'jeus'])
             ->where('inserted_by', $user->id)
             ->where('deleted', false);
 
@@ -274,7 +275,7 @@ class EvenementController extends Controller
         }
 
         return response()->json([
-            'message' => 'Events retrieved successfully',
+            'message' => 'Événements récupérés avec succès',
             'data' => EvenementResource::collection($query->latest()->get()),
             'status' => 200,
         ], 200);

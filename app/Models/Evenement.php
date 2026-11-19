@@ -10,7 +10,6 @@ class Evenement extends Model
     protected $fillable = [
         'user_id',
         'structure_id',
-        'jeu_id',
         'titre',
         'description',
         'lieu',
@@ -32,6 +31,10 @@ class Evenement extends Model
             'deleted' => 'boolean',
         ];
     }
+    public function jeus(): HasMany
+    {
+        return $this->hasMany(Jeu::class, 'evenement_id');
+    }
 
     public function user(): BelongsTo
     {
@@ -41,11 +44,6 @@ class Evenement extends Model
     public function structure(): BelongsTo
     {
         return $this->belongsTo(Structure::class);
-    }
-
-    public function jeu(): BelongsTo
-    {
-        return $this->belongsTo(Jeu::class);
     }
 
     public function jurys(): HasMany

@@ -200,7 +200,7 @@ class CategorieController extends Controller
             ], 404);
         }
 
-        if ($categorie->jeux()->exists()) {
+        if ($categorie->jeus()->exists()) {
             return response()->json([
                 'message' => 'Impossible de supprimer cette catégorie car des jeux lui sont associés.',
                 'status' => 409,
